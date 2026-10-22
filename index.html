@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Consultorio - Dra. Rodríguez Beltre</title>
+    <title>Sistema Clínico Gineco-Obstétrico - Dra. Elda Rodríguez</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,6 +14,7 @@
             #area-impresion { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
         }
+        .tab-active { border-bottom: 3px solid #be185d; color: #be185d; font-weight: bold; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 flex h-screen overflow-hidden">
@@ -21,12 +22,13 @@
     <!-- SIDEBAR / MENÚ LATERAL -->
     <aside class="w-64 bg-slate-900 text-white flex flex-col no-print shrink-0">
         <div class="p-5 border-b border-slate-800 text-center">
-            <h1 class="text-lg font-bold text-pink-400 tracking-wide">DRA. RODRÍGUEZ BELTRE</h1>
+            <h1 class="text-lg font-bold text-pink-400 tracking-wide">DRA. ELDA RODRÍGUEZ</h1>
             <p class="text-xs text-slate-400 mt-1">Gineco-Obstetra</p>
             <p class="text-[10px] text-slate-500">Exeq: 140-05 | CMD: 1819-6</p>
         </div>
         <nav class="flex-1 p-4 space-y-1">
-            <button onclick="navegar('pacientes')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-users text-pink-400"></i> Pacientes</button>
+            <button onclick="navegar('pacientes')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-users text-pink-400"></i> Padrón de Pacientes</button>
+            <button onclick="navegar('historia')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-file-medical text-pink-400"></i> Evaluación Clínica</button>
             <button onclick="navegar('prenatal')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-baby text-pink-400"></i> Control Prenatal</button>
             <button onclick="navegar('indicaciones')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-file-prescription text-pink-400"></i> Recetas e Indicaciones</button>
             <button onclick="navegar('caja')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-cash-register text-pink-400"></i> Caja y Facturación</button>
@@ -34,65 +36,34 @@
         <div class="p-4 border-t border-slate-800 text-xs text-slate-400">
             <p><i class="fa-solid fa-location-dot text-pink-400"></i> Consultorio 409</p>
             <p class="mt-1">Clínica Independencia Norte</p>
-            <p class="mt-1"><i class="fa-solid fa-phone"></i> (809) 577-9791</p>
+            <p class="mt-1">Av. Sol Poniente No. 7, Arroyo Hondo</p>
+            <p class="mt-1"><i class="fa-solid fa-phone"></i> (809) 577-9791 / (809) 989-2225</p>
         </div>
     </aside>
 
     <!-- ÁREA PRINCIPAL DE CONTENIDO -->
     <main class="flex-1 overflow-y-auto p-8 no-print">
 
-        <!-- VISTA 1: REGISTRO Y BÚSQUEDA DE PACIENTES -->
+        <!-- VISTA 1: PADRÓN DE PACIENTES -->
         <section id="vista-pacientes" class="space-y-6">
             <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Padrón de Pacientes</h2>
-                    <p class="text-xs text-gray-500">Gestión de expediente demográfico y aseguradoras</p>
+                    <h2 class="text-xl font-bold text-gray-800">Padrón General de Pacientes</h2>
+                    <p class="text-xs text-gray-500">Listado registrado para la consulta ginecológica y obstétrica</p>
                 </div>
-                <input type="text" id="buscar-paciente" onkeyup="filtrarPacientes()" placeholder="Buscar por Cédula o Nombre..." class="border p-2 rounded w-72 text-sm focus:outline-pink-500">
+                <div class="flex gap-2">
+                    <input type="text" id="buscar-paciente" onkeyup="filtrarPacientes()" placeholder="Buscar por Cédula o Nombre..." class="border p-2 rounded w-72 text-sm focus:outline-pink-500">
+                    <button onclick="exportarDatosJSON()" class="bg-slate-700 text-white px-3 py-2 rounded text-xs hover:bg-slate-800 transition"><i class="fa-solid fa-download"></i> Copia Segura</button>
+                </div>
             </div>
 
-            <!-- FORMULARIO REGISTRO -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 class="text-md font-semibold text-pink-700 border-b pb-2 mb-4">Registrar Nueva Paciente</h3>
-                <form id="form-paciente" onsubmit="guardarPaciente(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                        <label class="block font-medium mb-1">Cédula / Identificación *</label>
-                        <input type="text" id="pac-cedula" required class="w-full border p-2 rounded focus:outline-pink-500" placeholder="001-0000000-0">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Nombres *</label>
-                        <input type="text" id="pac-nombres" required class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Apellidos *</label>
-                        <input type="text" id="pac-apellidos" required class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Teléfono Principal *</label>
-                        <input type="text" id="pac-telefono" required class="w-full border p-2 rounded focus:outline-pink-500" placeholder="(809) 000-0000">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Aseguradora (ARS)</label>
-                        <input type="text" id="pac-ars" class="w-full border p-2 rounded focus:outline-pink-500" placeholder="Ej: Senasa, Humano, Palic">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">№ Afiliado ARS</label>
-                        <input type="text" id="pac-afiliado" class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
-                    <div class="md:col-span-3 flex justify-end gap-2 mt-2">
-                        <button type="button" onclick="exportarDatosJSON()" class="bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-800 transition"><i class="fa-solid fa-download"></i> Respaldar Datos</button>
-                        <button type="submit" class="bg-pink-700 text-white px-6 py-2 rounded font-medium hover:bg-pink-800 transition"><i class="fa-solid fa-user-plus"></i> Guardar Paciente</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- TABLA PACIENTES -->
             <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-100 text-slate-700 font-semibold border-b">
                         <tr>
-                            <th class="p-3">Cédula</th>
+                            <th class="p-3">Cédula / ID</th>
                             <th class="p-3">Paciente</th>
+                            <th class="p-3">Edad</th>
                             <th class="p-3">Teléfono</th>
                             <th class="p-3">ARS / Afiliado</th>
                             <th class="p-3 text-center">Acción</th>
@@ -105,165 +76,197 @@
             </div>
         </section>
 
-        <!-- VISTA 2: CONTROL PRENATAL -->
+        <!-- VISTA 2: EVALUACIÓN CLÍNICA GINECOLÓGICA COMPLETA (4 PESTAÑAS) -->
+        <section id="vista-historia" class="space-y-6 hidden">
+            <div class="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Evaluación Clínica Ginecológica</h2>
+                    <p class="text-xs text-gray-500">Formulario unificado oficial de recolección de datos</p>
+                </div>
+                <div class="w-72">
+                    <label class="block text-xs font-semibold text-pink-800 mb-1">Cargar o Seleccionar Paciente:</label>
+                    <select id="historia-paciente-select" onchange="cargarDatosPacienteSeleccionado()" class="w-full border p-2 rounded text-xs font-semibold focus:outline-pink-500 bg-pink-50"></select>
+                </div>
+            </div>
+
+            <!-- NAVEGACIÓN PESTAÑAS DENTRO DEL EXPEDIENTE -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="flex border-b text-sm font-semibold text-gray-600 gap-6 mb-6">
+                    <button onclick="cambiarSubTab('tab-generales')" id="btn-tab-generales" class="pb-2 tab-active"><i class="fa-solid fa-id-card"></i> 1. Generales y Sociales</button>
+                    <button onclick="cambiarSubTab('tab-antecedentes')" id="btn-tab-antecedentes" class="pb-2"><i class="fa-solid fa-notes-medical"></i> 2. Antecedentes Familiares y Clínicos</button>
+                    <button onclick="cambiarSubTab('tab-gineco')" id="btn-tab-gineco" class="pb-2"><i class="fa-solid fa-venus"></i> 3. Gineco-Obstétricos</button>
+                    <button onclick="cambiarSubTab('tab-consulta')" id="btn-tab-consulta" class="pb-2"><i class="fa-solid fa-stethoscope"></i> 4. Examen y Consulta</button>
+                </div>
+
+                <form id="form-evaluacion-completa" onsubmit="guardarEvaluacionClinica(event)">
+                    <!-- SUB-TAB 1: GENERALES -->
+                    <div id="tab-generales" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div><label class="block font-medium mb-1">Cédula / Identificación *</label><input type="text" id="eval-cedula" required class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Nombres y Apellidos Completo *</label><input type="text" id="eval-nombres" required class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Edad *</label><input type="number" id="eval-edad" required class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Ocupación</label><input type="text" id="eval-ocupacion" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Nacionalidad</label><input type="text" id="eval-nacionalidad" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Estado Civil</label><input type="text" id="eval-estadocivil" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Escolaridad</label><input type="text" id="eval-escolaridad" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Religión</label><input type="text" id="eval-religion" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Teléfono Principal</label><input type="text" id="eval-telefono" class="w-full border p-2 rounded"></div>
+                            <div class="md:col-span-2"><label class="block font-medium mb-1">Dirección</label><input type="text" id="eval-direccion" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Aseguradora (ARS)</label><input type="text" id="eval-ars" class="w-full border p-2 rounded"></div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 2: ANTECEDENTES FAMILIARES Y CLÍNICOS -->
+                    <div id="tab-antecedentes" class="space-y-4 hidden">
+                        <h3 class="font-bold text-pink-800 text-sm border-b pb-1">Antecedentes Familiares</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                            <div><label class="block font-medium mb-1">Padre</label><input type="text" id="eval-padre" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Madre</label><input type="text" id="eval-madre" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Hermanos</label><input type="text" id="eval-hermanos" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Otros Familiares</label><input type="text" id="eval-otrosfam" class="w-full border p-2 rounded"></div>
+                        </div>
+
+                        <h3 class="font-bold text-pink-800 text-sm border-b pb-1 pt-2">Antecedentes Personales No Patológicos</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                            <div><label class="block font-medium mb-1">Niñez</label><input type="text" id="eval-ninez" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Adolescencia</label><input type="text" id="eval-adolescencia" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Adultez</label><input type="text" id="eval-adultez" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Hábitos Tóxicos</label><input type="text" id="eval-toxicos" class="w-full border p-2 rounded"></div>
+                        </div>
+
+                        <h3 class="font-bold text-pink-800 text-sm border-b pb-1 pt-2">Antecedentes Clínicos y Quirúrgicos</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div><label class="block font-medium mb-1">Alergias</label><input type="text" id="eval-alergias" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Transfusiones</label><input type="text" id="eval-transfusiones" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Traumatismos</label><input type="text" id="eval-traumatismos" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Hospitalarios</label><input type="text" id="eval-hospitalarios" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Medicamentos de Uso Continuo</label><input type="text" id="eval-medicamentos" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Quirúrgicos</label><input type="text" id="eval-quirurgicos" class="w-full border p-2 rounded"></div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 3: GINECO OBSTÉTRICOS -->
+                    <div id="tab-gineco" class="space-y-4 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                            <div><label class="block font-medium mb-1">Telarquia</label><input type="text" id="eval-telarquia" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Menarquia</label><input type="text" id="eval-menarquia" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Patrón Menstrual</label><input type="text" id="eval-patron" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Duración</label><input type="text" id="eval-duracion" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Primer Coito</label><input type="text" id="eval-primercoito" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1"># Parejas Sexuales</label><input type="text" id="eval-parejas" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">Frecuencia Relaciones</label><input type="text" id="eval-frecuencia" class="w-full border p-2 rounded"></div>
+                            <div>
+                                <label class="block font-medium mb-1">Relaciones Satisfactorias</label>
+                                <select id="eval-satisfactorias" class="w-full border p-2 rounded"><option value="SI">SI</option><option value="NO">NO</option></select>
+                            </div>
+                            <div class="md:col-span-2"><label class="block font-medium mb-1">Planificación Familiar</label><input type="text" id="eval-planificacion" class="w-full border p-2 rounded"></div>
+                            <div class="md:col-span-2"><label class="block font-medium mb-1">Citología Vaginal (Papanicolaou)</label><input type="text" id="eval-citologia" class="w-full border p-2 rounded"></div>
+                            <div class="md:col-span-2"><label class="block font-medium mb-1">ITS (Infecciones Transmisión Sexual)</label><input type="text" id="eval-its" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">GPCA (Gestas, Partos, Cesáreas, Abortos)</label><input type="text" id="eval-gpca" placeholder="G: P: C: A:" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">FUM (Fecha Última Menstruación)</label><input type="date" id="eval-fum" class="w-full border p-2 rounded"></div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 4: CONSULTA Y EXAMEN FÍSICO -->
+                    <div id="tab-consulta" class="space-y-4 hidden">
+                        <div><label class="block font-medium text-sm mb-1">Motivo de Consulta *</label><textarea id="eval-motivo" rows="2" class="w-full border p-2 rounded text-sm"></textarea></div>
+
+                        <h3 class="font-bold text-pink-800 text-sm border-b pb-1">Signos Vitales</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                            <div><label class="block font-medium mb-1">T.A. (Presión)</label><input type="text" id="eval-ta" placeholder="120/80" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">F.C. (Cardíaca)</label><input type="text" id="eval-fc" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">F.R. (Respiratoria)</label><input type="text" id="eval-fr" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">TEMP (º C)</label><input type="text" id="eval-temp" class="w-full border p-2 rounded"></div>
+                            <div><label class="block font-medium mb-1">PESO (kg / lbs)</label><input type="text" id="eval-peso" class="w-full border p-2 rounded"></div>
+                        </div>
+
+                        <div><label class="block font-medium text-sm mb-1">Examen Físico *</label><textarea id="eval-examen" rows="3" class="w-full border p-2 rounded text-sm"></textarea></div>
+                        <div><label class="block font-medium text-sm mb-1">Diagnóstico de Impresión *</label><textarea id="eval-diagnostico" rows="2" class="w-full border p-2 rounded text-sm"></textarea></div>
+                        <div><label class="block font-medium text-sm mb-1">Plan de Tratamiento *</label><textarea id="eval-plan" rows="2" class="w-full border p-2 rounded text-sm"></textarea></div>
+                        <div><label class="block font-medium text-sm mb-1">Evaluación y Seguimiento</label><textarea id="eval-seguimiento" rows="2" class="w-full border p-2 rounded text-sm"></textarea></div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 border-t pt-4 mt-6">
+                        <button type="submit" class="bg-pink-700 text-white px-8 py-2.5 rounded font-bold hover:bg-pink-800 transition"><i class="fa-solid fa-floppy-disk"></i> Guardar Expediente Completo</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- VISTA 3: CONTROL PRENATAL -->
         <section id="vista-prenatal" class="space-y-6 hidden">
             <div class="bg-white p-4 rounded-lg shadow-sm border">
                 <h2 class="text-xl font-bold text-gray-800">Ficha de Control Prenatal</h2>
-                <p class="text-xs text-gray-500">Cálculo de FPP y evolución obstétrica por consulta</p>
+                <p class="text-xs text-gray-500">Cálculo de FPP y evolución obstétrica</p>
             </div>
-
             <div class="bg-white p-6 rounded-lg shadow-sm border space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-medium text-sm mb-1">Seleccionar Paciente *</label>
-                        <select id="prenatal-paciente-select" class="w-full border p-2 rounded text-sm focus:outline-pink-500"></select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-sm mb-1">Fecha Última Menstruación (FUM) *</label>
-                        <input type="date" id="prenatal-fum" onchange="calcularFPP()" class="w-full border p-2 rounded text-sm focus:outline-pink-500">
-                    </div>
+                    <div><label class="block font-medium text-sm mb-1">Seleccionar Paciente *</label><select id="prenatal-paciente-select" class="w-full border p-2 rounded text-sm"></select></div>
+                    <div><label class="block font-medium text-sm mb-1">FUM *</label><input type="date" id="prenatal-fum" onchange="calcularFPP()" class="w-full border p-2 rounded text-sm"></div>
                 </div>
-
-                <!-- CÁLCULO DE FPP Y EG -->
                 <div class="p-4 bg-pink-50 border border-pink-200 rounded-lg flex justify-around text-center">
-                    <div>
-                        <span class="block text-xs text-pink-700 font-semibold uppercase">Fecha Probable de Parto (FPP)</span>
-                        <span id="res-fpp" class="text-lg font-bold text-pink-900">-- / -- / ----</span>
-                    </div>
-                    <div>
-                        <span class="block text-xs text-pink-700 font-semibold uppercase">Edad Gestacional Estimada</span>
-                        <span id="res-eg" class="text-lg font-bold text-pink-900">0 Semanas</span>
-                    </div>
+                    <div><span class="block text-xs text-pink-700 font-semibold uppercase">FPP (Fecha Probable Parto)</span><span id="res-fpp" class="text-lg font-bold text-pink-900">-- / -- / ----</span></div>
+                    <div><span class="block text-xs text-pink-700 font-semibold uppercase">Edad Gestacional</span><span id="res-eg" class="text-lg font-bold text-pink-900">0 Semanas</span></div>
                 </div>
-
-                <!-- REGISTRO DE SIGNOS EN CONSULTA -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm pt-2">
-                    <div>
-                        <label class="block font-medium mb-1">Peso (kg)</label>
-                        <input type="number" step="0.1" id="prenatal-peso" class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Presión Arterial</label>
-                        <input type="text" id="prenatal-pa" placeholder="120/80" class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Altura Uterina (cm)</label>
-                        <input type="number" id="prenatal-au" class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">FCF (bpm)</label>
-                        <input type="number" id="prenatal-fcf" placeholder="140" class="w-full border p-2 rounded focus:outline-pink-500">
-                    </div>
+                    <div><label class="block font-medium mb-1">Peso (kg)</label><input type="number" step="0.1" id="prenatal-peso" class="w-full border p-2 rounded"></div>
+                    <div><label class="block font-medium mb-1">Presión Arterial</label><input type="text" id="prenatal-pa" placeholder="120/80" class="w-full border p-2 rounded"></div>
+                    <div><label class="block font-medium mb-1">Altura Uterina (cm)</label><input type="number" id="prenatal-au" class="w-full border p-2 rounded"></div>
+                    <div><label class="block font-medium mb-1">FCF (bpm)</label><input type="number" id="prenatal-fcf" placeholder="140" class="w-full border p-2 rounded"></div>
                 </div>
-
-                <div class="flex justify-end">
-                    <button onclick="guardarControlPrenatal()" class="bg-pink-700 text-white px-6 py-2 rounded font-medium hover:bg-pink-800 transition"><i class="fa-solid fa-floppy-disk"></i> Registrar Control</button>
-                </div>
+                <div class="flex justify-end"><button onclick="alert('Control Guardado');" class="bg-pink-700 text-white px-6 py-2 rounded font-medium hover:bg-pink-800 transition"><i class="fa-solid fa-floppy-disk"></i> Guardar Control</button></div>
             </div>
         </section>
 
-        <!-- VISTA 3: GENERADOR DE RECETAS E INDICACIONES -->
+        <!-- VISTA 4: GENERADOR DE RECETAS -->
         <section id="vista-indicaciones" class="space-y-6 hidden">
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <h2 class="text-xl font-bold text-gray-800">Generador de Recetas y Analíticas</h2>
-                <p class="text-xs text-gray-500">Emisión e impresión con membrete oficial</p>
-            </div>
-
+            <div class="bg-white p-4 rounded-lg shadow-sm border"><h2 class="text-xl font-bold text-gray-800">Recetas e Indicaciones Médicas</h2></div>
             <div class="bg-white p-6 rounded-lg shadow-sm border space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-medium text-sm mb-1">Paciente *</label>
-                        <select id="receta-paciente-select" class="w-full border p-2 rounded text-sm focus:outline-pink-500"></select>
-                    </div>
-                    <div>
-                        <label class="block font-medium text-sm mb-1">Tipo de Documento</label>
-                        <select id="receta-tipo" class="w-full border p-2 rounded text-sm focus:outline-pink-500">
-                            <option value="RECETA MÉDICA">Receta Médica / Tratamiento</option>
-                            <option value="INDICACIÓN DE ANALÍTICAS">Indicación de Analíticas</option>
-                            <option value="INDICACIÓN DE IMÁGENES">Indicación de Ecografía / Mamografía</option>
-                        </select>
-                    </div>
+                    <div><label class="block font-medium text-sm mb-1">Paciente *</label><select id="receta-paciente-select" class="w-full border p-2 rounded text-sm"></select></div>
+                    <div><label class="block font-medium text-sm mb-1">Tipo Documento</label><select id="receta-tipo" class="w-full border p-2 rounded text-sm"><option value="RECETA MÉDICA">Receta Médica / Tratamiento</option><option value="INDICACIÓN DE ANALÍTICAS">Indicación de Analíticas</option><option value="INDICACIÓN DE IMÁGENES">Indicación de Ecografía / Mamografía</option></select></div>
                 </div>
-
-                <div>
-                    <label class="block font-medium text-sm mb-1">Detalle e Indicaciones Médicas *</label>
-                    <textarea id="receta-contenido" rows="6" class="w-full border p-3 rounded text-sm focus:outline-pink-500" placeholder="Escriba aqui los medicamentos, dosis o estudios solicitados..."></textarea>
-                </div>
-
-                <div class="flex justify-end">
-                    <button onclick="prepararEImprimirReceta()" class="bg-slate-800 text-white px-6 py-2 rounded font-medium hover:bg-slate-900 transition"><i class="fa-solid fa-print"></i> Vista Previa e Imprimir</button>
-                </div>
+                <div><label class="block font-medium text-sm mb-1">Detalle Médicos *</label><textarea id="receta-contenido" rows="6" class="w-full border p-3 rounded text-sm" placeholder="Escriba aquí..."></textarea></div>
+                <div class="flex justify-end"><button onclick="prepararEImprimirReceta()" class="bg-slate-800 text-white px-6 py-2 rounded font-medium hover:bg-slate-900 transition"><i class="fa-solid fa-print"></i> Imprimir Documento</button></div>
             </div>
         </section>
 
-        <!-- VISTA 4: CAJA Y FACTURACIÓN -->
+        <!-- VISTA 5: CAJA -->
         <section id="vista-caja" class="space-y-6 hidden">
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <h2 class="text-xl font-bold text-gray-800">Control de Caja y Facturación</h2>
-                <p class="text-xs text-gray-500">Registro de ingresos por consultas y copagos ARS</p>
-            </div>
-
+            <div class="bg-white p-4 rounded-lg shadow-sm border"><h2 class="text-xl font-bold text-gray-800">Caja y Facturación</h2></div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-6 rounded-lg shadow-sm border col-span-1 space-y-3">
                     <h3 class="font-semibold text-pink-700 border-b pb-2">Nuevo Ingreso</h3>
-                    <div>
-                        <label class="block text-xs font-medium mb-1">Monto (DOP) *</label>
-                        <input type="number" id="caja-monto" class="w-full border p-2 rounded text-sm focus:outline-pink-500" placeholder="0.00">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium mb-1">Concepto *</label>
-                        <input type="text" id="caja-concepto" class="w-full border p-2 rounded text-sm focus:outline-pink-500" placeholder="Ej: Consulta Ginecológica, Copago ARS">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium mb-1">Forma de Pago</label>
-                        <select id="caja-pago" class="w-full border p-2 rounded text-sm focus:outline-pink-500">
-                            <option value="Efectivo">Efectivo</option>
-                            <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
-                            <option value="Transferencia">Transferencia Bancaria</option>
-                        </select>
-                    </div>
-                    <button onclick="registrarIngresoCaja()" class="w-full bg-pink-700 text-white py-2 rounded font-medium hover:bg-pink-800 transition"><i class="fa-solid fa-plus"></i> Registrar Cobro</button>
+                    <div><label class="block text-xs font-medium mb-1">Monto (DOP) *</label><input type="number" id="caja-monto" class="w-full border p-2 rounded text-sm" placeholder="0.00"></div>
+                    <div><label class="block text-xs font-medium mb-1">Concepto *</label><input type="text" id="caja-concepto" class="w-full border p-2 rounded text-sm" placeholder="Consulta / Copago ARS"></div>
+                    <div><label class="block text-xs font-medium mb-1">Forma Pago</label><select id="caja-pago" class="w-full border p-2 rounded text-sm"><option value="Efectivo">Efectivo</option><option value="Tarjeta">Tarjeta</option><option value="Transferencia">Transferencia</option></select></div>
+                    <button onclick="registrarIngresoCaja()" class="w-full bg-pink-700 text-white py-2 rounded font-medium hover:bg-pink-800 transition">Registrar Cobro</button>
                 </div>
-
                 <div class="bg-white p-6 rounded-lg shadow-sm border col-span-2">
                     <h3 class="font-semibold text-slate-800 border-b pb-2 mb-3">Movimientos de Hoy</h3>
-                    <div class="overflow-y-auto max-h-60">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-100 border-b">
-                                <tr>
-                                    <th class="p-2">Hora</th>
-                                    <th class="p-2">Concepto</th>
-                                    <th class="p-2">Pago</th>
-                                    <th class="p-2 text-right">Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-caja-body" class="divide-y"></tbody>
-                        </table>
-                    </div>
-                    <div class="border-t mt-4 pt-3 flex justify-between items-center font-bold text-sm">
-                        <span>Total Recaudado:</span>
-                        <span id="total-caja" class="text-pink-700 text-base">RD$ 0.00</span>
-                    </div>
+                    <table class="w-full text-left text-xs"><thead class="bg-slate-100 border-b"><tr><th class="p-2">Hora</th><th class="p-2">Concepto</th><th class="p-2">Pago</th><th class="p-2 text-right">Monto</th></tr></thead><tbody id="tabla-caja-body" class="divide-y"></tbody></table>
+                    <div class="border-t mt-4 pt-3 flex justify-between items-center font-bold text-sm"><span>Total Recaudado:</span><span id="total-caja" class="text-pink-700 text-base">RD$ 0.00</span></div>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- ÁREA DE IMPRESIÓN SOLAMENTE (PLANTILLA OFICIAL MEMBRETADA) -->
+    <!-- ÁREA DE IMPRESIÓN OFICIAL CON MEMBRETE COMPLETO -->
     <div id="area-impresion" class="hidden p-10 bg-white text-gray-900 font-sans">
         <header class="text-center border-b-2 border-pink-700 pb-4 mb-6">
-            <h1 class="text-2xl font-bold text-pink-900">DRA. RODRÍGUEZ BELTRE</h1>
-            <p class="text-sm font-semibold">Gineco-Obstetra</p>
-            <p class="text-xs text-gray-600">Exequátur: 140-05 | CMD: 1819-6</p>
+            <h1 class="text-2xl font-bold text-pink-900">EVALUACIÓN CLÍNICA GINECOLÓGICA</h1>
+            <p class="text-sm font-semibold">Dra. Elda Rodríguez — Gineco-Obstetra</p>
+            <p class="text-xs text-gray-600">Edificio Profesionales, Clínica Independencia Norte, Consultorio 409</p>
+            <p class="text-xs text-gray-600">Av. Sol Poniente No. 7, Arroyo Hondo, Sto. Dgo. D.N | Cons.: (809) 577-9791 / (809) 989-2225</p>
         </header>
 
-        <section class="mb-6 text-sm bg-gray-50 p-3 rounded border">
+        <section class="mb-6 text-xs bg-gray-50 p-3 rounded border">
             <div class="flex justify-between">
-                <p><strong>Paciente:</strong> <span id="imp-paciente">--</span></p>
-                <p><strong>Fecha:</strong> <span id="imp-fecha">--</span></p>
+                <p><strong>PACIENTE:</strong> <span id="imp-paciente">--</span></p>
+                <p><strong>FECHA:</strong> <span id="imp-fecha">--</span></p>
             </div>
-            <p class="mt-1"><strong>Cédula:</strong> <span id="imp-cedula">--</span></p>
+            <p class="mt-1"><strong>CÉDULA / ID:</strong> <span id="imp-cedula">--</span></p>
         </section>
 
         <main class="min-h-[400px]">
@@ -274,18 +277,16 @@
         <footer class="border-t-2 border-pink-700 pt-6 text-center text-xs text-gray-600 mt-12">
             <div class="flex justify-center mb-8">
                 <div class="w-56 border-t border-gray-400 pt-1">
-                    <p class="font-semibold">Dra. Rodríguez Beltre</p>
-                    <p class="text-[10px] text-gray-500">Firma y Sello Médico</p>
+                    <p class="font-semibold">Dra. Elda Rodríguez</p>
+                    <p class="text-[10px] text-gray-500">Gineco-obstetra</p>
                 </div>
             </div>
-            <p class="font-semibold">Consultorio 409, Edificio de Profesionales, Clínica Independencia Norte</p>
-            <p>Santo Domingo, D.N. | Teléfonos: (809) 577-9791 / (809) 989-2225</p>
+            <p>Edificio Profesionales, Clínica Independencia Norte, Consultorio 409</p>
         </footer>
     </div>
 
-    <!-- NUCLEO DE LÓGICA JAVASCRIPT -->
+    <!-- MOTOR DE LÓGICA JAVASCRIPT -->
     <script>
-        // ESTADO DE LA APLICACIÓN (PERSISTENCIA CON LOCALSTORAGE)
         let pacientes = JSON.parse(localStorage.getItem('pacientes_db')) || [];
         let caja = JSON.parse(localStorage.getItem('caja_db')) || [];
 
@@ -295,32 +296,124 @@
             renderCaja();
         });
 
-        // NAVEGACIÓN ENTRE SECCIONES
         function navegar(sec) {
-            ['pacientes', 'prenatal', 'indicaciones', 'caja'].forEach(s => {
+            ['pacientes', 'historia', 'prenatal', 'indicaciones', 'caja'].forEach(s => {
                 document.getElementById(`vista-${s}`).classList.add('hidden');
             });
             document.getElementById(`vista-${sec}`).classList.remove('hidden');
         }
 
-        // VISTA 1: PACIENTES
-        function guardarPaciente(e) {
+        function cambiarSubTab(tabId) {
+            ['tab-generales', 'tab-antecedentes', 'tab-gineco', 'tab-consulta'].forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+                document.getElementById(`btn-${t}`).classList.remove('tab-active');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(`btn-${tabId}`).classList.add('tab-active');
+        }
+
+        function guardarEvaluacionClinica(e) {
             e.preventDefault();
-            const nuevo = {
-                id: Date.now(),
-                cedula: document.getElementById('pac-cedula').value,
-                nombres: document.getElementById('pac-nombres').value,
-                apellidos: document.getElementById('pac-apellidos').value,
-                telefono: document.getElementById('pac-telefono').value,
-                ars: document.getElementById('pac-ars').value || 'Privado',
-                afiliado: document.getElementById('pac-afiliado').value || 'N/A'
-            };
-            pacientes.push(nuevo);
+            const ced = document.getElementById('eval-cedula').value;
+            let p = pacientes.find(item => item.cedula === ced);
+            if (!p) {
+                p = { id: Date.now(), cedula: ced };
+                pacientes.push(p);
+            }
+
+            p.nombres = document.getElementById('eval-nombres').value;
+            p.edad = document.getElementById('eval-edad').value;
+            p.ocupacion = document.getElementById('eval-ocupacion').value;
+            p.nacionalidad = document.getElementById('eval-nacionalidad').value;
+            p.estadocivil = document.getElementById('eval-estadocivil').value;
+            p.escolaridad = document.getElementById('eval-escolaridad').value;
+            p.religion = document.getElementById('eval-religion').value;
+            p.telefono = document.getElementById('eval-telefono').value;
+            p.direccion = document.getElementById('eval-direccion').value;
+            p.ars = document.getElementById('eval-ars').value;
+
+            // Antecedentes
+            p.padre = document.getElementById('eval-padre').value;
+            p.madre = document.getElementById('eval-madre').value;
+            p.hermanos = document.getElementById('eval-hermanos').value;
+            p.otrosfam = document.getElementById('eval-otrosfam').value;
+            p.ninez = document.getElementById('eval-ninez').value;
+            p.adolescencia = document.getElementById('eval-adolescencia').value;
+            p.adultez = document.getElementById('eval-adultez').value;
+            p.toxicos = document.getElementById('eval-toxicos').value;
+            p.alergias = document.getElementById('eval-alergias').value;
+            p.transfusiones = document.getElementById('eval-transfusiones').value;
+            p.traumatismos = document.getElementById('eval-traumatismos').value;
+            p.hospitalarios = document.getElementById('eval-hospitalarios').value;
+            p.medicamentos = document.getElementById('eval-medicamentos').value;
+            p.quirurgicos = document.getElementById('eval-quirurgicos').value;
+
+            // Gineco
+            p.telarquia = document.getElementById('eval-telarquia').value;
+            p.menarquia = document.getElementById('eval-menarquia').value;
+            p.patron = document.getElementById('eval-patron').value;
+            p.duracion = document.getElementById('eval-duracion').value;
+            p.primercoito = document.getElementById('eval-primercoito').value;
+            p.parejas = document.getElementById('eval-parejas').value;
+            p.frecuencia = document.getElementById('eval-frecuencia').value;
+            p.satisfactorias = document.getElementById('eval-satisfactorias').value;
+            p.planificacion = document.getElementById('eval-planificacion').value;
+            p.citologia = document.getElementById('eval-citologia').value;
+            p.its = document.getElementById('eval-its').value;
+            p.gpca = document.getElementById('eval-gpca').value;
+            p.fum = document.getElementById('eval-fum').value;
+
             localStorage.setItem('pacientes_db', JSON.stringify(pacientes));
-            document.getElementById('form-paciente').reset();
             renderPacientes();
             cargarSelectsPacientes();
-            alert('Paciente guardada correctamente.');
+            alert('Evaluación clínica guardada exitosamente.');
+        }
+
+        function cargarDatosPacienteSeleccionado() {
+            const id = document.getElementById('historia-paciente-select').value;
+            const p = pacientes.find(item => item.id == id);
+            if (!p) return;
+
+            document.getElementById('eval-cedula').value = p.cedula || '';
+            document.getElementById('eval-nombres').value = p.nombres || '';
+            document.getElementById('eval-edad').value = p.edad || '';
+            document.getElementById('eval-ocupacion').value = p.ocupacion || '';
+            document.getElementById('eval-nacionalidad').value = p.nacionalidad || '';
+            document.getElementById('eval-estadocivil').value = p.estadocivil || '';
+            document.getElementById('eval-escolaridad').value = p.escolaridad || '';
+            document.getElementById('eval-religion').value = p.religion || '';
+            document.getElementById('eval-telefono').value = p.telefono || '';
+            document.getElementById('eval-direccion').value = p.direccion || '';
+            document.getElementById('eval-ars').value = p.ars || '';
+
+            document.getElementById('eval-padre').value = p.padre || '';
+            document.getElementById('eval-madre').value = p.madre || '';
+            document.getElementById('eval-hermanos').value = p.hermanos || '';
+            document.getElementById('eval-otrosfam').value = p.otrosfam || '';
+            document.getElementById('eval-ninez').value = p.ninez || '';
+            document.getElementById('eval-adolescencia').value = p.adolescencia || '';
+            document.getElementById('eval-adultez').value = p.adultez || '';
+            document.getElementById('eval-toxicos').value = p.toxicos || '';
+            document.getElementById('eval-alergias').value = p.alergias || '';
+            document.getElementById('eval-transfusiones').value = p.transfusiones || '';
+            document.getElementById('eval-traumatismos').value = p.traumatismos || '';
+            document.getElementById('eval-hospitalarios').value = p.hospitalarios || '';
+            document.getElementById('eval-medicamentos').value = p.medicamentos || '';
+            document.getElementById('eval-quirurgicos').value = p.quirurgicos || '';
+
+            document.getElementById('eval-telarquia').value = p.telarquia || '';
+            document.getElementById('eval-menarquia').value = p.menarquia || '';
+            document.getElementById('eval-patron').value = p.patron || '';
+            document.getElementById('eval-duracion').value = p.duracion || '';
+            document.getElementById('eval-primercoito').value = p.primercoito || '';
+            document.getElementById('eval-parejas').value = p.parejas || '';
+            document.getElementById('eval-frecuencia').value = p.frecuencia || '';
+            document.getElementById('eval-satisfactorias').value = p.satisfactorias || 'SI';
+            document.getElementById('eval-planificacion').value = p.planificacion || '';
+            document.getElementById('eval-citologia').value = p.citologia || '';
+            document.getElementById('eval-its').value = p.its || '';
+            document.getElementById('eval-gpca').value = p.gpca || '';
+            document.getElementById('eval-fum').value = p.fum || '';
         }
 
         function renderPacientes(filtrados = null) {
@@ -329,9 +422,10 @@
             tbody.innerHTML = lista.map(p => `
                 <tr class="hover:bg-gray-50">
                     <td class="p-3">${p.cedula}</td>
-                    <td class="p-3 font-semibold">${p.nombres} ${p.apellidos}</td>
-                    <td class="p-3">${p.telefono}</td>
-                    <td class="p-3">${p.ars} (${p.afiliado})</td>
+                    <td class="p-3 font-semibold">${p.nombres || 'Sin Nombre'}</td>
+                    <td class="p-3">${p.edad || '--'}</td>
+                    <td class="p-3">${p.telefono || '--'}</td>
+                    <td class="p-3">${p.ars || 'Privado'}</td>
                     <td class="p-3 text-center">
                         <button onclick="eliminarPaciente(${p.id})" class="text-red-600 hover:text-red-800 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
                     </td>
@@ -341,7 +435,7 @@
 
         function filtrarPacientes() {
             const q = document.getElementById('buscar-paciente').value.toLowerCase();
-            const res = pacientes.filter(p => p.nombres.toLowerCase().includes(q) || p.apellidos.toLowerCase().includes(q) || p.cedula.includes(q));
+            const res = pacientes.filter(p => (p.nombres && p.nombres.toLowerCase().includes(q)) || p.cedula.includes(q));
             renderPacientes(res);
         }
 
@@ -355,42 +449,31 @@
         }
 
         function cargarSelectsPacientes() {
-            const options = pacientes.map(p => `<option value="${p.id}">${p.nombres} ${p.apellidos} (${p.cedula})</option>`).join('');
+            const options = '<option value="">-- Seleccionar Paciente --</option>' + pacientes.map(p => `<option value="${p.id}">${p.nombres || 'Sin Nombre'} (${p.cedula})</option>`).join('');
+            document.getElementById('historia-paciente-select').innerHTML = options;
             document.getElementById('prenatal-paciente-select').innerHTML = options;
             document.getElementById('receta-paciente-select').innerHTML = options;
         }
 
-        // VISTA 2: PRENATAL
         function calcularFPP() {
             const fumVal = document.getElementById('prenatal-fum').value;
             if (!fumVal) return;
             const fum = new Date(fumVal);
-            
-            // Regla de Naegele: FUM + 7 días - 3 meses + 1 año
             let fpp = new Date(fum);
             fpp.setDate(fpp.getDate() + 7);
             fpp.setMonth(fpp.getMonth() + 9);
-            
-            // Cálculo EG
             const hoy = new Date();
-            const diffTiempo = Math.abs(hoy - fum);
-            const semanas = Math.floor(diffTiempo / (1000 * 60 * 60 * 24 * 7));
-
+            const semanas = Math.floor(Math.abs(hoy - fum) / (1000 * 60 * 60 * 24 * 7));
             document.getElementById('res-fpp').innerText = fpp.toLocaleDateString('es-DO');
             document.getElementById('res-eg').innerText = `${semanas} Semanas`;
         }
 
-        function guardarControlPrenatal() {
-            alert('Control prenatal registrado correctamente en el historial local.');
-        }
-
-        // VISTA 3: IMPRESIÓN RECETA
         function prepararEImprimirReceta() {
             const idPac = document.getElementById('receta-paciente-select').value;
             const pac = pacientes.find(p => p.id == idPac);
             if (!pac) return alert('Seleccione una paciente primero');
 
-            document.getElementById('imp-paciente').innerText = `${pac.nombres} ${pac.apellidos}`;
+            document.getElementById('imp-paciente').innerText = pac.nombres;
             document.getElementById('imp-cedula').innerText = pac.cedula;
             document.getElementById('imp-fecha').innerText = new Date().toLocaleDateString('es-DO');
             document.getElementById('imp-titulo-doc').innerText = document.getElementById('receta-tipo').value;
@@ -401,18 +484,12 @@
             document.getElementById('area-impresion').classList.add('hidden');
         }
 
-        // VISTA 4: CAJA
         function registrarIngresoCaja() {
             const monto = parseFloat(document.getElementById('caja-monto').value);
             const concepto = document.getElementById('caja-concepto').value;
             const pago = document.getElementById('caja-pago').value;
-
-            if (!monto || !concepto) return alert('Complete el monto y concepto');
-
-            caja.push({
-                hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                monto, concepto, pago
-            });
+            if (!monto || !concepto) return alert('Complete monto y concepto');
+            caja.push({ hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), monto, concepto, pago });
             localStorage.setItem('caja_db', JSON.stringify(caja));
             renderCaja();
             document.getElementById('caja-monto').value = '';
@@ -424,24 +501,16 @@
             let total = 0;
             tbody.innerHTML = caja.map(c => {
                 total += c.monto;
-                return `
-                    <tr>
-                        <td class="p-2">${c.hora}</td>
-                        <td class="p-2">${c.concepto}</td>
-                        <td class="p-2">${c.pago}</td>
-                        <td class="p-2 text-right font-semibold">RD$ ${c.monto.toFixed(2)}</td>
-                    </tr>
-                `;
+                return `<tr><td class="p-2">${c.hora}</td><td class="p-2">${c.concepto}</td><td class="p-2">${c.pago}</td><td class="p-2 text-right font-semibold">RD$ ${c.monto.toFixed(2)}</td></tr>`;
             }).join('');
             document.getElementById('total-caja').innerText = `RD$ ${total.toFixed(2)}`;
         }
 
-        // EXPORTACIÓN DE SEGURO
         function exportarDatosJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ pacientes, caja }));
             const anchor = document.createElement('a');
             anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", `Copia_Seguridad_Consultorio_${new Date().toISOString().slice(0,10)}.json`);
+            anchor.setAttribute("download", `Respaldo_Consultorio_DraElda_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(anchor);
             anchor.click();
             anchor.remove();
