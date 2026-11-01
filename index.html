@@ -27,7 +27,7 @@
             <p class="text-[10px] text-slate-500">Exeq: 140-05 | CMD: 1819-6</p>
         </div>
         <nav class="flex-1 p-4 space-y-1">
-            <button onclick="navegar('pacientes')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-users text-pink-400"></i> Padrón de Pacientes</button>
+            <button onclick="navegar('pacientes')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-users text-pink-400"></i> Matriz de Expedientes</button>
             <button onclick="navegar('historia')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-file-medical text-pink-400"></i> Evaluación Clínica</button>
             <button onclick="navegar('prenatal')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-baby text-pink-400"></i> Control Prenatal</button>
             <button onclick="navegar('indicaciones')" class="w-full text-left py-2.5 px-4 rounded hover:bg-slate-800 flex items-center gap-3 transition"><i class="fa-solid fa-file-prescription text-pink-400"></i> Recetas e Indicaciones</button>
@@ -44,16 +44,17 @@
     <!-- ÁREA PRINCIPAL DE CONTENIDO -->
     <main class="flex-1 overflow-y-auto p-8 no-print">
 
-        <!-- VISTA 1: PADRÓN DE PACIENTES -->
+        <!-- VISTA 1: MATRIZ DE EXPEDIENTES / PACIENTES -->
         <section id="vista-pacientes" class="space-y-6">
             <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Padrón General de Pacientes</h2>
-                    <p class="text-xs text-gray-500">Listado registrado para la consulta ginecológica y obstétrica</p>
+                    <h2 class="text-xl font-bold text-gray-800">Matriz General de Expedientes</h2>
+                    <p class="text-xs text-gray-500">Base de datos de pacientes guardada localmente en la laptop</p>
                 </div>
                 <div class="flex gap-2">
                     <input type="text" id="buscar-paciente" onkeyup="filtrarPacientes()" placeholder="Buscar por Cédula o Nombre..." class="border p-2 rounded w-72 text-sm focus:outline-pink-500">
-                    <button onclick="exportarDatosJSON()" class="bg-slate-700 text-white px-3 py-2 rounded text-xs hover:bg-slate-800 transition"><i class="fa-solid fa-download"></i> Copia Segura</button>
+                    <button onclick="exportarMatrizExcel()" class="bg-emerald-700 text-white px-3 py-2 rounded text-xs hover:bg-emerald-800 transition"><i class="fa-solid fa-file-excel"></i> Exportar Matriz (Excel)</button>
+                    <button onclick="exportarDatosJSON()" class="bg-slate-700 text-white px-3 py-2 rounded text-xs hover:bg-slate-800 transition"><i class="fa-solid fa-download"></i> Respaldo JSON</button>
                 </div>
             </div>
 
@@ -65,8 +66,10 @@
                             <th class="p-3">Paciente</th>
                             <th class="p-3">Edad</th>
                             <th class="p-3">Teléfono</th>
-                            <th class="p-3">ARS / Afiliado</th>
-                            <th class="p-3 text-center">Acción</th>
+                            <th class="p-3">ARS</th>
+                            <th class="p-3">GPCA</th>
+                            <th class="p-3">Consultas</th>
+                            <th class="p-3 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-pacientes-body" class="divide-y">
@@ -95,7 +98,8 @@
                     <button onclick="cambiarSubTab('tab-generales')" id="btn-tab-generales" class="pb-2 tab-active"><i class="fa-solid fa-id-card"></i> 1. Generales y Sociales</button>
                     <button onclick="cambiarSubTab('tab-antecedentes')" id="btn-tab-antecedentes" class="pb-2"><i class="fa-solid fa-notes-medical"></i> 2. Antecedentes Familiares y Clínicos</button>
                     <button onclick="cambiarSubTab('tab-gineco')" id="btn-tab-gineco" class="pb-2"><i class="fa-solid fa-venus"></i> 3. Gineco-Obstétricos</button>
-                    <button onclick="cambiarSubTab('tab-consulta')" id="btn-tab-consulta" class="pb-2"><i class="fa-solid fa-stethoscope"></i> 4. Examen y Consulta</button>
+                    <button onclick="cambiarSubTab('tab-consulta')" id="btn-tab-consulta" class="pb-2"><i class="fa-solid fa-stethoscope"></i> 4. Consulta Actual y Examen</button>
+                    <button onclick="cambiarSubTab('tab-historial')" id="btn-tab-historial" class="pb-2"><i class="fa-solid fa-clock-rotate-left"></i> 5. Historial de Consultas</button>
                 </div>
 
                 <form id="form-evaluacion-completa" onsubmit="guardarEvaluacionClinica(event)">
@@ -186,8 +190,16 @@
                         <div><label class="block font-medium text-sm mb-1">Evaluación y Seguimiento</label><textarea id="eval-seguimiento" rows="2" class="w-full border p-2 rounded text-sm"></textarea></div>
                     </div>
 
+                    <!-- SUB-TAB 5: HISTORIAL CRONOLÓGICO -->
+                    <div id="tab-historial" class="space-y-4 hidden">
+                        <h3 class="font-bold text-pink-800 text-sm border-b pb-2">Consultas Anteriores de esta Paciente</h3>
+                        <div id="contenedor-historial-consultas" class="space-y-3">
+                            <p class="text-xs text-gray-500 italic">Seleccione una paciente para ver sus consultas pasadas.</p>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-3 border-t pt-4 mt-6">
-                        <button type="submit" class="bg-pink-700 text-white px-8 py-2.5 rounded font-bold hover:bg-pink-800 transition"><i class="fa-solid fa-floppy-disk"></i> Guardar Expediente Completo</button>
+                        <button type="submit" class="bg-pink-700 text-white px-8 py-2.5 rounded font-bold hover:bg-pink-800 transition"><i class="fa-solid fa-floppy-disk"></i> Guardar Consulta en Matriz</button>
                     </div>
                 </form>
             </div>
@@ -218,7 +230,7 @@
             </div>
         </section>
 
-        <!-- VISTA 4: GENERADOR DE RECETAS -->
+        <!-- VISTA 4: GENERADOR DE RECETAS CON PLANTILLAS RÁPIDAS -->
         <section id="vista-indicaciones" class="space-y-6 hidden">
             <div class="bg-white p-4 rounded-lg shadow-sm border"><h2 class="text-xl font-bold text-gray-800">Recetas e Indicaciones Médicas</h2></div>
             <div class="bg-white p-6 rounded-lg shadow-sm border space-y-4">
@@ -226,6 +238,18 @@
                     <div><label class="block font-medium text-sm mb-1">Paciente *</label><select id="receta-paciente-select" class="w-full border p-2 rounded text-sm"></select></div>
                     <div><label class="block font-medium text-sm mb-1">Tipo Documento</label><select id="receta-tipo" class="w-full border p-2 rounded text-sm"><option value="RECETA MÉDICA">Receta Médica / Tratamiento</option><option value="INDICACIÓN DE ANALÍTICAS">Indicación de Analíticas</option><option value="INDICACIÓN DE IMÁGENES">Indicación de Ecografía / Mamografía</option></select></div>
                 </div>
+
+                <!-- PLANTILLAS RÁPIDAS -->
+                <div class="bg-slate-50 p-3 rounded border text-xs">
+                    <span class="font-bold text-slate-700 block mb-2">Plantillas Rápidas Frecuentes:</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="cargarPlantilla('analiticas_primer_trimestre')" class="bg-white border px-2.5 py-1 rounded hover:bg-pink-50 hover:border-pink-300">Analíticas 1er Trimestre</button>
+                        <button onclick="cargarPlantilla('suplementos_prenatales')" class="bg-white border px-2.5 py-1 rounded hover:bg-pink-50 hover:border-pink-300">Hierro + Ácido Fólico</button>
+                        <button onclick="cargarPlantilla('ovulos_infeccion')" class="bg-white border px-2.5 py-1 rounded hover:bg-pink-50 hover:border-pink-300">Esquema Infección Vaginal</button>
+                        <button onclick="cargarPlantilla('sonografia_obstetrica')" class="bg-white border px-2.5 py-1 rounded hover:bg-pink-50 hover:border-pink-300">Perfil Biofísico / Sonografía</button>
+                    </div>
+                </div>
+
                 <div><label class="block font-medium text-sm mb-1">Detalle Médicos *</label><textarea id="receta-contenido" rows="6" class="w-full border p-3 rounded text-sm" placeholder="Escriba aquí..."></textarea></div>
                 <div class="flex justify-end"><button onclick="prepararEImprimirReceta()" class="bg-slate-800 text-white px-6 py-2 rounded font-medium hover:bg-slate-900 transition"><i class="fa-solid fa-print"></i> Imprimir Documento</button></div>
             </div>
@@ -285,7 +309,7 @@
         </footer>
     </div>
 
-    <!-- MOTOR DE LÓGICA JAVASCRIPT -->
+    <!-- MOTOR DE LÓGICA JAVASCRIPT CON MATRIZ AVANZADA -->
     <script>
         let pacientes = JSON.parse(localStorage.getItem('pacientes_db')) || [];
         let caja = JSON.parse(localStorage.getItem('caja_db')) || [];
@@ -304,7 +328,7 @@
         }
 
         function cambiarSubTab(tabId) {
-            ['tab-generales', 'tab-antecedentes', 'tab-gineco', 'tab-consulta'].forEach(t => {
+            ['tab-generales', 'tab-antecedentes', 'tab-gineco', 'tab-consulta', 'tab-historial'].forEach(t => {
                 document.getElementById(t).classList.add('hidden');
                 document.getElementById(`btn-${t}`).classList.remove('tab-active');
             });
@@ -317,9 +341,10 @@
             const ced = document.getElementById('eval-cedula').value;
             let p = pacientes.find(item => item.cedula === ced);
             if (!p) {
-                p = { id: Date.now(), cedula: ced };
+                p = { id: Date.now(), cedula: ced, consultas: [] };
                 pacientes.push(p);
             }
+            if (!p.consultas) p.consultas = [];
 
             p.nombres = document.getElementById('eval-nombres').value;
             p.edad = document.getElementById('eval-edad').value;
@@ -363,10 +388,28 @@
             p.gpca = document.getElementById('eval-gpca').value;
             p.fum = document.getElementById('eval-fum').value;
 
+            // Registro de Consulta en la Matriz Histórica
+            const nuevaConsulta = {
+                fecha: new Date().toLocaleDateString('es-DO'),
+                motivo: document.getElementById('eval-motivo').value,
+                ta: document.getElementById('eval-ta').value,
+                fc: document.getElementById('eval-fc').value,
+                fr: document.getElementById('eval-fr').value,
+                temp: document.getElementById('eval-temp').value,
+                peso: document.getElementById('eval-peso').value,
+                examen: document.getElementById('eval-examen').value,
+                diagnostico: document.getElementById('eval-diagnostico').value,
+                plan: document.getElementById('eval-plan').value,
+                seguimiento: document.getElementById('eval-seguimiento').value
+            };
+
+            p.consultas.push(nuevaConsulta);
+
             localStorage.setItem('pacientes_db', JSON.stringify(pacientes));
             renderPacientes();
             cargarSelectsPacientes();
-            alert('Evaluación clínica guardada exitosamente.');
+            renderHistorialConsultas(p);
+            alert('Consulta registrada y expediente guardado en la matriz.');
         }
 
         function cargarDatosPacienteSeleccionado() {
@@ -414,6 +457,28 @@
             document.getElementById('eval-its').value = p.its || '';
             document.getElementById('eval-gpca').value = p.gpca || '';
             document.getElementById('eval-fum').value = p.fum || '';
+
+            renderHistorialConsultas(p);
+        }
+
+        function renderHistorialConsultas(p) {
+            const cont = document.getElementById('contenedor-historial-consultas');
+            if (!p.consultas || p.consultas.length === 0) {
+                cont.innerHTML = '<p class="text-xs text-gray-500 italic">No hay consultas anteriores registradas para esta paciente.</p>';
+                return;
+            }
+            cont.innerHTML = p.consultas.map((c, index) => `
+                <div class="border rounded-lg p-4 bg-slate-50 space-y-2 text-xs">
+                    <div class="flex justify-between font-bold text-pink-800 border-b pb-1">
+                        <span>Consulta #${index + 1} — ${c.fecha}</span>
+                        <span>TA: ${c.ta || '--'} | Peso: ${c.peso || '--'}</span>
+                    </div>
+                    <p><strong>Motivo:</strong> ${c.motivo || 'N/A'}</p>
+                    <p><strong>Examen Físico:</strong> ${c.examen || 'N/A'}</p>
+                    <p><strong>Diagnóstico:</strong> ${c.diagnostico || 'N/A'}</p>
+                    <p><strong>Plan de Tratamiento:</strong> ${c.plan || 'N/A'}</p>
+                </div>
+            `).join('');
         }
 
         function renderPacientes(filtrados = null) {
@@ -421,11 +486,13 @@
             const tbody = document.getElementById('tabla-pacientes-body');
             tbody.innerHTML = lista.map(p => `
                 <tr class="hover:bg-gray-50">
-                    <td class="p-3">${p.cedula}</td>
-                    <td class="p-3 font-semibold">${p.nombres || 'Sin Nombre'}</td>
+                    <td class="p-3 font-mono text-xs">${p.cedula}</td>
+                    <td class="p-3 font-semibold text-slate-900">${p.nombres || 'Sin Nombre'}</td>
                     <td class="p-3">${p.edad || '--'}</td>
                     <td class="p-3">${p.telefono || '--'}</td>
                     <td class="p-3">${p.ars || 'Privado'}</td>
+                    <td class="p-3 font-semibold text-pink-700">${p.gpca || '--'}</td>
+                    <td class="p-3 text-center font-bold">${(p.consultas || []).length}</td>
                     <td class="p-3 text-center">
                         <button onclick="eliminarPaciente(${p.id})" class="text-red-600 hover:text-red-800 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>
                     </td>
@@ -440,7 +507,7 @@
         }
 
         function eliminarPaciente(id) {
-            if (confirm('¿Desea eliminar esta paciente?')) {
+            if (confirm('¿Desea eliminar esta paciente y todo su expediente?')) {
                 pacientes = pacientes.filter(p => p.id !== id);
                 localStorage.setItem('pacientes_db', JSON.stringify(pacientes));
                 renderPacientes();
@@ -453,6 +520,23 @@
             document.getElementById('historia-paciente-select').innerHTML = options;
             document.getElementById('prenatal-paciente-select').innerHTML = options;
             document.getElementById('receta-paciente-select').innerHTML = options;
+        }
+
+        function cargarPlantilla(tipo) {
+            const area = document.getElementById('receta-contenido');
+            if (tipo === 'analiticas_primer_trimestre') {
+                document.getElementById('receta-tipo').value = 'INDICACIÓN DE ANALÍTICAS';
+                area.value = "1. Hemograma Completo\n2. Tipificación Sanguínea y Factor Rh\n3. Glicemia en Ayunas\n4. Examen General de Orina (EGO)\n5. VDRL / Serología\n6. VIH 1 y 2 (Prueba Rápida)\n7. Rubéola IgG e IgM\n8. Toxoplasmosis IgG e IgM";
+            } else if (tipo === 'suplementos_prenatales') {
+                document.getElementById('receta-tipo').value = 'RECETA MÉDICA';
+                area.value = "1. Ácido Fólico 5 mg: Tomar 1 tableta cada mañana con el desayuno.\n2. Fumarato Ferroso 300 mg: Tomar 1 tableta al día al mediodía.\n3. Calcio 600 mg + Vitamina D3: Tomar 1 tableta en la cena.";
+            } else if (tipo === 'ovulos_infeccion') {
+                document.getElementById('receta-tipo').value = 'RECETA MÉDICA';
+                area.value = "1. Óvulos Vaginales Mixtos (Metronidazol + Nistatina): Aplicar 1 óvulo por vía vaginal cada noche antes de dormir durante 7 días consecutivos.\n2. Jabón Íntimo de pH Fisiológico: Uso diario en el aseo personal.";
+            } else if (tipo === 'sonografia_obstetrica') {
+                document.getElementById('receta-tipo').value = 'INDICACIÓN DE IMÁGENES';
+                area.value = "Favor realizar: Ultrasonido Obstétrico pélvico / Perfil Biofísico Fetal (PBF) para evaluación de edad gestacional, biometría fetal, líquido amniótico y localización placentaria.";
+            }
         }
 
         function calcularFPP() {
@@ -504,6 +588,22 @@
                 return `<tr><td class="p-2">${c.hora}</td><td class="p-2">${c.concepto}</td><td class="p-2">${c.pago}</td><td class="p-2 text-right font-semibold">RD$ ${c.monto.toFixed(2)}</td></tr>`;
             }).join('');
             document.getElementById('total-caja').innerText = `RD$ ${total.toFixed(2)}`;
+        }
+
+        // EXPORTACIÓN A EXCEL (MATRIZ CSV)
+        function exportarMatrizExcel() {
+            if (pacientes.length === 0) return alert('No hay expedientes para exportar.');
+            let csv = 'Cedula,Nombres,Edad,Telefono,ARS,GPCA,FUM,Total_Consultas\n';
+            pacientes.forEach(p => {
+                csv += `"${p.cedula}","${p.nombres || ''}","${p.edad || ''}","${p.telefono || ''}","${p.ars || ''}","${p.gpca || ''}","${p.fum || ''}","${(p.consultas||[]).length}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `Matriz_Expedientes_DraElda_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         }
 
         function exportarDatosJSON() {
